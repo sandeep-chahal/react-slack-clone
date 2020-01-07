@@ -5,6 +5,11 @@ import App from "./components/App";
 import * as serviceWorker from "./serviceWorker";
 import firebase from "./firebase";
 
+import { createStore } from "redux";
+import { Provider, connect } from "react-redux";
+import rootReducer from "./Redux/Reducers";
+import { setUser } from "./Redux/Actions";
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -14,11 +19,16 @@ import {
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 
+const store = createStore(
+  rootReducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);
 class Root extends React.Component {
   componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         this.props.history.push("/");
+        this.props.setUser(user);
       }
     });
   }
@@ -33,12 +43,20 @@ class Root extends React.Component {
   }
 }
 
-const RootWithAuth = withRouter(Root);
+const mapDispatchToProps = dispatch => {
+  return {
+    setUser: user => dispatch(setUser(user))
+  };
+};
+
+const RootWithAuth = withRouter(connect(null, mapDispatchToProps)(Root));
 
 ReactDOM.render(
-  <Router>
-    <RootWithAuth />
-  </Router>,
+  <Provider store={store}>
+    <Router>
+      <RootWithAuth />
+    </Router>
+  </Provider>,
   document.getElementById("root")
 );
 
