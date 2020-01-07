@@ -24,8 +24,24 @@ const userReducuer = (state = INITIAL_STATE, action) => {
   }
 };
 
+// channel reducer
+
+const CHANNEL_INITIAL_STORE = { currentChannel: null };
+
+const channelReducer = (state = CHANNEL_INITIAL_STORE, action) => {
+  switch (action.type) {
+    case actionTypes.SET_CURRENT_CHANNEL:
+      return {
+        currentChannel: action.payLoad
+      };
+    default:
+      return state;
+  }
+};
+
 const rootReducer = combineReducers({
-  user: userReducuer
+  user: userReducuer,
+  channel: channelReducer
 });
 
 export default rootReducer;
