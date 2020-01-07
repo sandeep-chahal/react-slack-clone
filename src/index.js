@@ -18,6 +18,7 @@ import {
 } from "react-router-dom";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
+import Spinner from "./Spinner";
 
 const store = createStore(
   rootReducer,
@@ -33,7 +34,9 @@ class Root extends React.Component {
     });
   }
   render() {
-    return (
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
       <Switch>
         <Route exact path="/" component={App} />
         <Route path="/login" component={Login} />
@@ -48,8 +51,13 @@ const mapDispatchToProps = dispatch => {
     setUser: user => dispatch(setUser(user))
   };
 };
+const mapStateToProps = state => ({
+  isLoading: state.user.isLoading
+});
 
-const RootWithAuth = withRouter(connect(null, mapDispatchToProps)(Root));
+const RootWithAuth = withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(Root)
+);
 
 ReactDOM.render(
   <Provider store={store}>
