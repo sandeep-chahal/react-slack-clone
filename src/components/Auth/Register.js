@@ -85,30 +85,18 @@ class Register extends React.Component {
                 .then(() => {
                   this.setState({ loading: false });
                 })
-                .catch(err => {
-                  this.setState({
-                    loading: false,
-                    errors: this.state.errors.concat(err)
-                  });
-                  console.log(err);
-                });
-            })
-            .catch(err => {
-              this.setState({
-                loading: false,
-                errors: this.state.errors.concat(err)
-              });
-            });
+                .catch(this.handleErrors)
+            .catch(this.handleErrors);
         })
-        .catch(err => {
-          console.error(err);
-          this.setState({
-            loading: false,
-            errors: this.state.errors.concat(err)
-          });
-        });
+        .catch(this.handleErrors);
     }
   };
+
+  handleErrors = error =>
+    this.setState({
+      loading: false,
+      errors: this.state.errors.concat(err)
+    });
 
   displayErrors = errors =>
     errors.map((error, index) => <p key={index}>{error.message}</p>);
