@@ -85,7 +85,8 @@ class Register extends React.Component {
                 .then(() => {
                   this.setState({ loading: false });
                 })
-                .catch(this.handleErrors)
+                .catch(this.handleErrors);
+            })
             .catch(this.handleErrors);
         })
         .catch(this.handleErrors);
@@ -95,7 +96,7 @@ class Register extends React.Component {
   handleErrors = error =>
     this.setState({
       loading: false,
-      errors: this.state.errors.concat(err)
+      errors: this.state.errors.concat(error)
     });
 
   displayErrors = errors =>
