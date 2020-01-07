@@ -8,7 +8,7 @@ import firebase from "./firebase";
 import { createStore } from "redux";
 import { Provider, connect } from "react-redux";
 import rootReducer from "./Redux/Reducers";
-import { setUser } from "./Redux/Actions";
+import { setUser, clearUser } from "./Redux/Actions";
 
 import {
   BrowserRouter as Router,
@@ -30,6 +30,9 @@ class Root extends React.Component {
       if (user) {
         this.props.history.push("/");
         this.props.setUser(user);
+      } else {
+        this.props.history.push("/login");
+        this.props.clearUser();
       }
     });
   }
@@ -48,7 +51,8 @@ class Root extends React.Component {
 
 const mapDispatchToProps = dispatch => {
   return {
-    setUser: user => dispatch(setUser(user))
+    setUser: user => dispatch(setUser(user)),
+    clearUser: () => dispatch(clearUser())
   };
 };
 const mapStateToProps = state => ({
