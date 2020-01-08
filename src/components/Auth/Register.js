@@ -60,19 +60,19 @@ class Register extends React.Component {
 
   handleSubmit = event => {
     event.preventDefault();
+    const updatedProfile = {
+      displayName: this.state.username,
+      photoURL: `https://avatars.dicebear.com/v2/male/${md5(
+        this.state.email
+      )}.svg?options[mood][]=happy&options[mood][]=surprised`
+    };
     if (this.isFormVaild()) {
       firebase
         .auth()
         .createUserWithEmailAndPassword(this.state.email, this.state.password)
         .then(user => {
-          console.log(user);
           user.user
-            .updateProfile({
-              displayName: this.state.username,
-              photoURL: `https://avatars.dicebear.com/v2/male/${md5(
-                user.user.email
-              )}.svg?options[mood][]=happy&options[mood][]=surprised`
-            })
+            .updateProfile(updatedProfile)
             .then(() => {
               firebase
                 .database()

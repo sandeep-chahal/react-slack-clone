@@ -3,18 +3,22 @@ import "./App.css";
 import { Grid } from "semantic-ui-react";
 import { connect } from "react-redux";
 
-import ColorPannel from "./ColorPannel/ColorPannel";
+import ColorPanel from "./ColorPanel/ColorPanel";
 import MetaPannel from "./MetaPannel/MetaPannel";
 import Messages from "./Messages/Messages";
 import SidePannel from "./SidePannel/SidePannel";
 
-function App({ user }) {
+function App({ user, currentChannel }) {
   return (
     <Grid columns="equal" className="app" style={{ background: "#eee" }}>
-      <ColorPannel />
-      <SidePannel user={user} />
+      <ColorPanel />
+      <SidePannel user={user} key={user && user.uid} />
       <Grid.Column style={{ marginLeft: 320 }}>
-        <Messages />
+        <Messages
+          user={user}
+          currentChannel={currentChannel}
+          key={currentChannel && currentChannel.id}
+        />
       </Grid.Column>
       <Grid.Column width={4}>
         <MetaPannel />
@@ -25,7 +29,8 @@ function App({ user }) {
 
 const mapStateToProps = state => {
   return {
-    user: state.user.user
+    user: state.user.user,
+    currentChannel: state.channel.currentChannel
   };
 };
 
