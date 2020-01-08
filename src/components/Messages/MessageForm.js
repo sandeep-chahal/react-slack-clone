@@ -2,13 +2,17 @@ import React from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
 import firebase from "firebase";
 import FileModal from "./FileModal";
+import uuidv4 from "uuid/v4";
 
 class MessageForm extends React.Component {
   state = {
     message: "",
     loading: false,
     errors: [],
-    modal: false
+    modal: false,
+    errors: [],
+    uploadState: "",
+    percentageUploaded: 0
   };
 
   openModal = () => this.setState({ modal: true });
@@ -20,9 +24,8 @@ class MessageForm extends React.Component {
     });
   };
 
-  createMessage = () => {
+  createMessage = (fileUrl = null) => {
     const message = {
-      content: this.state.message,
       timestamp: firebase.database.ServerValue.TIMESTAMP,
       user: {
         id: this.props.user.uid,
@@ -30,6 +33,11 @@ class MessageForm extends React.Component {
         avatar: this.props.user.photoURL
       }
     };
+    if (fileUrl !== null) {
+      message.fileUrl = fileUrl;
+    } else {
+      message.content = this.state.message;
+    }
     return message;
   };
 
@@ -59,6 +67,62 @@ class MessageForm extends React.Component {
         errors: this.state.errors.concat({ message: "Add a message" })
       });
     }
+  };
+
+  uploadFile = (file, metadata) => {
+    const channelToUplaod = this.props.currentChannel.id;
+    // path to uplaod file with random name
+    const storageRef = firebase
+      .storage()
+      .ref("chat/public/" + uuidv4() + ".jpg");
+
+    // uploading file
+    const task = storageRef.put(file, metadata);
+
+    // event listners
+    task.on(
+      "state_changed",
+      snap => {
+        // snapshot while uplaoding
+        var percentage = Math.round(
+          (snap.bytesTransferred / snap.totalBytes) * 100
+        );
+        this.setState({ percentageUploaded: percentage });
+        this.setState({ uploadState: "uploading" });
+      },
+      err => {
+        // error while uplaoding
+        console.log(err);
+        this.setState({
+          errors: this.state.errors.concat(err),
+          uploadState: "error"
+        });
+      },
+      () => {
+        // succesfully uploaded
+        this.setState({ uploadState: "uploaded" });
+        // after uploading get url and send it as message
+        task.snapshot.ref.getDownloadURL().then(url => {
+          this.sendFileMessage(url, channelToUplaod);
+        });
+      }
+    );
+  };
+
+  sendFileMessage = (url, channelToUplaod) => {
+    firebase
+      .database()
+      .ref("messages")
+      .child(channelToUplaod)
+      .push()
+      .set(this.createMessage(url))
+      .then(() => {
+        this.setState({ uploadState: "done" });
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({ errors: this.state.errors.concat(err) });
+      });
   };
 
   render() {
@@ -97,7 +161,11 @@ class MessageForm extends React.Component {
             icon="cloud upload"
             onClick={this.openModal}
           />
-          <FileModal modal={this.state.modal} closeModal={this.closeModal} />
+          <FileModal
+            uploadFile={this.uploadFile}
+            modal={this.state.modal}
+            closeModal={this.closeModal}
+          />
         </Button.Group>
       </Segment>
     );
