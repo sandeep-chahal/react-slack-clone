@@ -8,14 +8,15 @@ class MessagesHeader extends React.Component {
         {/* Channel Title */}
         <Header fluid="true" as="h2" floated="left" style={{ marginBottom: 0 }}>
           <span>
-            Channel
+            #{this.props.channelName}&nbsp;
             <Icon name={"star outline"} color="black" />
           </span>
-          <Header.Subheader>2 Users</Header.Subheader>
+          <Header.Subheader>{this.props.totalUsers}</Header.Subheader>
         </Header>
         {/* Channel Search Input */}
         <Header floated="right">
           <Input
+            onChange={this.props.handleSearchChange}
             size="mini"
             icon="search"
             name="searchTerm"
