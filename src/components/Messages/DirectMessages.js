@@ -2,13 +2,15 @@ import React from "react";
 import firebase from "../../firebase";
 import { Menu, Icon } from "semantic-ui-react";
 import { connect } from "react-redux";
+import { setCurrentChannel, setPrivateChannel } from "../../Redux/Actions";
 
 class DirectMessages extends React.Component {
   state = {
     users: [],
     usersRef: firebase.database().ref("users"),
     connectedRef: firebase.database().ref(".info/connected"),
-    presenceRef: firebase.database().ref("presence")
+    presenceRef: firebase.database().ref("presence"),
+    activeChannel: null
   };
   componentDidMount() {
     if (this.props.user) {
@@ -26,6 +28,7 @@ class DirectMessages extends React.Component {
         loadedUsers.push(user);
         this.setState({ users: loadedUsers });
       }
+      // this.addNotifications(snap.key);
     });
     this.state.connectedRef.on("value", snap => {
       if (snap.val() === true) {
@@ -56,9 +59,26 @@ class DirectMessages extends React.Component {
     this.setState({ users: updatedUsers });
   };
 
+  changeChannel = user => {
+    const channelId = this.getChannelId(user.uid);
+    const channelData = {
+      id: channelId,
+      name: user.name
+    };
+    this.props.setCurrentChannel(channelData);
+    this.props.setPrivateChannel(true);
+    this.setState({ activeChannel: user.uid });
+  };
+
+  getChannelId = userId => {
+    const currentUserUid = this.props.user.uid;
+    return userId < currentUserUid
+      ? `${userId}/${currentUserUid}`
+      : `${currentUserUid}/${userId}`;
+  };
+
   render() {
     const { users } = this.state;
-    // const { user } = this.props;
     return (
       <Menu.Menu className="menu">
         <Menu.Item>
@@ -71,8 +91,9 @@ class DirectMessages extends React.Component {
         {users.map(user => (
           <Menu.Item
             key={user.uid}
-            onClick={() => console.log(user)}
+            onClick={() => this.changeChannel(user)}
             style={{ opacity: 0.7, fontStyle: "italic" }}
+            active={user.uid === this.state.activeChannel}
           >
             <Icon
               name="circle"
@@ -85,4 +106,7 @@ class DirectMessages extends React.Component {
     );
   }
 }
-export default DirectMessages;
+
+export default connect(null, { setCurrentChannel, setPrivateChannel })(
+  DirectMessages
+);

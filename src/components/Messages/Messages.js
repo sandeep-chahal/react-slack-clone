@@ -25,12 +25,18 @@ class Messages extends React.Component {
     this.addMessageListner(channelId);
   };
 
+  getMessagesRef = () => {
+    if (this.props.isPrivate) {
+      return firebase.database().ref("privateMessages");
+    } else {
+      return firebase.database().ref("messages");
+    }
+  };
+
   addMessageListner = channelId => {
     const loadedMessages = [];
-    console.log(channelId);
-    firebase
-      .database()
-      .ref("messages")
+
+    this.getMessagesRef()
       .child(channelId)
       .on("child_added", snap => {
         loadedMessages.push(snap.val());
@@ -52,7 +58,9 @@ class Messages extends React.Component {
     );
   };
 
-  displayChannelName = channel => (channel ? channel.name : "");
+  displayChannelName = channel =>
+    channel ? (this.props.isPrivate ? `@` : "#") + channel.name : "";
+
   numberOfUsers = messages => {
     const uniqueUsers = messages.reduce((acc, message) => {
       if (!acc.includes(message.user.name)) acc.push(message.user.name);
@@ -94,6 +102,7 @@ class Messages extends React.Component {
           channelName={this.displayChannelName(this.props.currentChannel)}
           totalUsers={this.numberOfUsers(this.state.messages)}
           handleSearchChange={this.handleSearchChange}
+          isPrivate={this.props.isPrivate}
         />
         <Segment>
           <Comment.Group className="messages">
@@ -105,7 +114,8 @@ class Messages extends React.Component {
         <MessageForm
           user={this.props.user}
           currentChannel={this.props.currentChannel}
-          // messagesRef={firebase.database().ref("messages")}
+          isPrivate={this.props.isPrivate}
+          getMessagesRef={this.getMessagesRef}
         />
       </React.Fragment>
     );

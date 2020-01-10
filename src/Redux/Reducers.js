@@ -26,13 +26,22 @@ const userReducuer = (state = INITIAL_STATE, action) => {
 
 // channel reducer
 
-const CHANNEL_INITIAL_STORE = { currentChannel: null };
+const CHANNEL_INITIAL_STORE = {
+  currentChannel: null,
+  isPrivate: false
+};
 
 const channelReducer = (state = CHANNEL_INITIAL_STORE, action) => {
   switch (action.type) {
     case actionTypes.SET_CURRENT_CHANNEL:
       return {
+        ...state,
         currentChannel: action.payLoad
+      };
+    case actionTypes.SET_PRIVATE_CHANNEL:
+      return {
+        ...state,
+        isPrivate: action.payload.isPrivate
       };
     default:
       return state;
