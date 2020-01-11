@@ -28,8 +28,9 @@ class DirectMessages extends React.Component {
         loadedUsers.push(user);
         this.setState({ users: loadedUsers });
       }
-      // this.addNotifications(snap.key);
+      // this.addNotificationListner(snap.key);
     });
+
     this.state.connectedRef.on("value", snap => {
       if (snap.val() === true) {
         const ref = this.state.presenceRef.child(currentUserUid);
@@ -75,6 +76,14 @@ class DirectMessages extends React.Component {
     return userId < currentUserUid
       ? `${userId}/${currentUserUid}`
       : `${currentUserUid}/${userId}`;
+  };
+
+  // notificatoins
+  addNotificationListner = channelId => {
+    firebase
+      .database()
+      .ref("privateMessages")
+      .on("value", snap => {});
   };
 
   render() {
